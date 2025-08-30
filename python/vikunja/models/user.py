@@ -56,7 +56,7 @@ class UserBase(BaseModel):
     """Base user schema."""
     username: str
     email: EmailStr
-    name: str
+    name: Optional[str] = None  # Make name optional for compatibility with frontend
     timezone: Optional[str] = None
     week_start: int = 0
     language: Optional[str] = None

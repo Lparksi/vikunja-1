@@ -78,10 +78,12 @@ async def register(
     
     # Create new user
     hashed_password = get_password_hash(user_data.password)
+    # Use username as name if name is not provided (frontend compatibility)
+    user_name = user_data.name if user_data.name else user_data.username
     new_user = User(
         username=user_data.username,
         email=user_data.email,
-        name=user_data.name,
+        name=user_name,
         password=hashed_password,
         timezone=user_data.timezone,
         week_start=user_data.week_start,
