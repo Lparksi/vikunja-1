@@ -95,7 +95,7 @@ async def delete_task(
 
 
 # Project-specific task routes (matching Go API structure)
-@router.put("/projects/{project_id}/tasks", response_model=TaskResponse)
+@router.put("/{project_id}/tasks", response_model=TaskResponse)
 async def create_project_task(
     project_id: int,
     task_data: TaskCreate,
@@ -121,7 +121,7 @@ async def create_project_task(
     return TaskResponse.model_validate(new_task)
 
 
-@router.get("/projects/{project_id}/tasks", response_model=List[TaskResponse])
+@router.get("/{project_id}/tasks", response_model=List[TaskResponse])
 async def list_project_tasks(
     project_id: int,
     db: AsyncSession = Depends(get_db),

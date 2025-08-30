@@ -4,6 +4,7 @@
 from vikunja.models.base import Base, TimestampMixin
 from vikunja.models.user import User
 from vikunja.models.project import Project, ProjectUser, Team, TeamMember, TeamProject
+from vikunja.models.project_view import ProjectView
 from vikunja.models.task import Task, TaskAssginee, Label, LabelTask, TaskComment, TaskAttachment, Bucket
 
 # Add missing relationships to User model
@@ -21,6 +22,7 @@ __all__ = [
     "Team", 
     "TeamMember", 
     "TeamProject",
+    "ProjectView",
     "Task", 
     "TaskAssginee", 
     "Label", 

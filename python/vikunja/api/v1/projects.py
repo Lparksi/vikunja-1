@@ -12,6 +12,7 @@ from vikunja.models.project import (
     Project, ProjectCreate, ProjectUpdate, ProjectResponse,
     ProjectUser, ProjectUserResponse
 )
+from vikunja.models.task import Task, TaskCreate, TaskResponse
 from vikunja.auth.dependencies import get_current_user
 
 router = APIRouter()
@@ -134,6 +135,65 @@ async def list_project_users(
     project_users = result.scalars().all()
     
     return [ProjectUserResponse.model_validate(pu) for pu in project_users]
+
+
+@router.put("/{project_id}/tasks", response_model=TaskResponse)
+async def create_project_task(
+    project_id: int,
+    task_data: TaskCreate,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+) -> TaskResponse:
+    """Create a new task in a project."""
+    # Verify user has write access to the project
+    await _get_project_with_write_access(db, project_id, current_user)
+    
+    # Override project_id to ensure consistency
+    task_data.project_id = project_id
+    
+    new_task = Task(
+        **task_data.dict(),
+        created_by_id=current_user.id
+    )
+    
+    db.add(new_task)
+    await db.commit()
+    await db.refresh(new_task)
+    
+    return TaskResponse.model_validate(new_task)
+
+
+@router.get("/{project_id}/tasks", response_model=List[TaskResponse])
+async def list_project_tasks(
+    project_id: int,
+    db: AsyncSession = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+    done: Optional[bool] = Query(None),
+    page: int = Query(1, ge=1),
+    per_page: int = Query(50, ge=1, le=100)
+) -> List[TaskResponse]:
+    """List tasks in a specific project."""
+    # Verify user has access to the project
+    await _get_project_with_access(db, project_id, current_user)
+    
+    # Build query
+    query = select(Task).where(Task.project_id == project_id)
+    
+    # Apply filters
+    if done is not None:
+        query = query.where(Task.done == done)
+    
+    # Apply pagination
+    offset = (page - 1) * per_page
+    query = query.offset(offset).limit(per_page)
+    
+    # Order by position and creation date
+    query = query.order_by(Task.position, Task.created_at)
+    
+    result = await db.execute(query)
+    tasks = result.scalars().all()
+    
+    return [TaskResponse.model_validate(task) for task in tasks]
 
 
 async def _get_project_with_access(
