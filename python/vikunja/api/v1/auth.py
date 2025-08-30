@@ -71,6 +71,11 @@ async def register(
             detail="Username or email already registered"
         )
     
+    # Check if this is the first user (admin)
+    count_result = await db.execute(select(User))
+    user_count = len(count_result.scalars().all())
+    is_first_user = user_count == 0
+    
     # Create new user
     hashed_password = get_password_hash(user_data.password)
     new_user = User(
@@ -81,6 +86,7 @@ async def register(
         timezone=user_data.timezone,
         week_start=user_data.week_start,
         language=user_data.language,
+        is_admin=is_first_user,  # First user becomes admin
     )
     
     db.add(new_user)

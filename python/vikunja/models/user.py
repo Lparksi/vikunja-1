@@ -27,6 +27,7 @@ class User(Base, TimestampMixin):
     
     # Status fields
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
+    is_admin: Mapped[bool] = mapped_column(Boolean, default=False)
     password_reset_token: Mapped[Optional[str]] = mapped_column(String(450))
     email_confirm_token: Mapped[Optional[str]] = mapped_column(String(450))
     is_email_confirmed: Mapped[bool] = mapped_column(Boolean, default=False)
@@ -79,6 +80,7 @@ class UserResponse(UserBase):
     """User response schema."""
     id: int
     is_active: bool
+    is_admin: bool
     is_email_confirmed: bool
     totp_enabled: bool
     avatar_provider: str
