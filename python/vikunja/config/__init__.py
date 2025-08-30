@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     service_enable_totp: bool = Field(default=True, env="VIKUNJA_SERVICE_ENABLETOTP")
     service_enable_email_reminders: bool = Field(default=True, env="VIKUNJA_SERVICE_ENABLEEMAILREMINDERS")
     service_enable_user_deletion: bool = Field(default=True, env="VIKUNJA_SERVICE_ENABLEUSERDELETION")
+    service_enable_public_teams: bool = Field(default=True, env="VIKUNJA_SERVICE_ENABLEPUBLICTEAMS")
     
     # JWT settings
     jwt_secret: str = Field(default="your-secret-key", env="VIKUNJA_SERVICE_JWTSECRET")
@@ -40,7 +41,7 @@ class Settings(BaseSettings):
     database_path: str = Field(default="./vikunja.db", env="VIKUNJA_DATABASE_PATH")
     
     # CORS settings
-    cors_enable: bool = Field(default=False, env="VIKUNJA_CORS_ENABLE")
+    cors_enable: bool = Field(default=True, env="VIKUNJA_CORS_ENABLE")
     cors_origins: List[str] = Field(default=["*"], env="VIKUNJA_CORS_ORIGINS")
     cors_max_age: int = Field(default=86400, env="VIKUNJA_CORS_MAXAGE")
     

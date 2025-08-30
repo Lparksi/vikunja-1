@@ -46,6 +46,18 @@ def create_app() -> FastAPI:
         """Health check endpoint."""
         return {"status": "ok"}
 
+    # Root endpoint with instructions for development
+    @app.get("/")
+    async def root() -> dict[str, str]:
+        """Root endpoint with development instructions."""
+        return {
+            "message": "Vikunja Python Backend",
+            "version": "0.1.0",
+            "api_docs": "/api/v1/docs",
+            "health": "/health",
+            "note": "This is the API backend only. For the full application, please access the frontend at http://127.0.0.1:4173 in development mode."
+        }
+
     return app
 
 
