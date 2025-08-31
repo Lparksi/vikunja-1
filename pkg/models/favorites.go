@@ -30,6 +30,7 @@ const (
 	FavoriteKindUnknown FavoriteKind = iota
 	FavoriteKindTask
 	FavoriteKindProject
+	FavoriteKindMerchant
 )
 
 // Favorite represents an entity which is a favorite to someone

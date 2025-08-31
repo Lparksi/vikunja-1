@@ -379,6 +379,39 @@ const router = createRouter({
 			},
 		},
 		{
+			path: '/merchants',
+			name: 'merchants.index',
+			component: () => import('@/views/merchants/Index.vue'),
+		},
+		{
+			path: '/merchants/new',
+			name: 'merchants.create',
+			component: () => import('@/views/merchants/NewMerchant.vue'),
+			meta: {
+				showAsModal: true,
+			},
+		},
+		{
+			path: '/merchants/:id/edit',
+			name: 'merchants.edit',
+			component: () => import('@/views/merchants/EditMerchant.vue'),
+			props: route => ({ merchantId: Number(route.params.id as string) }),
+			meta: {
+				showAsModal: true,
+			},
+		},
+		{
+			path: '/merchants/:id',
+			name: 'merchants.show',
+			component: () => import('@/views/merchants/ShowMerchant.vue'),
+			props: route => ({ merchantId: Number(route.params.id as string) }),
+		},
+		{
+			path: '/merchants/import',
+			name: 'merchants.import',
+			component: () => import('@/views/merchants/ImportMerchants.vue'),
+		},
+		{
 			path: '/auth/openid/:provider',
 			name: 'openid.auth',
 			component: OpenIdAuth,

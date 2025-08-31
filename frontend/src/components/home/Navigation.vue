@@ -61,6 +61,17 @@
 				</li>
 				<li>
 					<RouterLink
+						v-shortcut="'g c'"
+						:to="{ name: 'merchants.index'}"
+					>
+						<span class="menu-item-icon icon">
+							<Icon icon="store" />
+						</span>
+						{{ $t('merchant.title') }}
+					</RouterLink>
+				</li>
+				<li>
+					<RouterLink
 						v-shortcut="'g m'"
 						:to="{ name: 'teams.index'}"
 					>

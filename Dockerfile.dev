@@ -1,0 +1,114 @@
+# syntax=docker/dockerfile:1@sha256:38387523653efa0039f8e1c89bb74a30504e76ee9f565e25c9a09841f9427b05
+
+# ================================
+# Frontend Builder Stage
+# ================================
+FROM --platform=$BUILDPLATFORM node:22.19.0-alpine@sha256:d2166de198f26e17e5a442f537754dd616ab069c47cc57b889310a717e0abbf9 AS frontendbuilder
+
+# 设置工作目录
+WORKDIR /build
+
+# 配置环境变量
+ENV PNPM_CACHE_FOLDER=.cache/pnpm/
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV CYPRESS_INSTALL_BINARY=0
+ENV NODE_ENV=production
+
+# 优化：先安装 pnpm，利用 Docker 层缓存
+RUN npm install -g corepack && corepack enable
+
+# 优化：先复制依赖文件，利用层缓存（依赖不变时可以复用）
+COPY frontend/pnpm-lock.yaml frontend/package.json frontend/.npmrc ./
+COPY frontend/patches ./patches
+
+# 优化：使用 --mount=type=cache 缓存 pnpm 安装
+RUN --mount=type=cache,target=.cache/pnpm \
+    pnpm install --frozen-lockfile --production=false
+
+# 复制源代码（放在依赖安装后，避免代码变更时重新安装依赖）
+COPY frontend/ ./
+
+# 构建前端
+ARG RELEASE_VERSION=dev
+RUN echo "{\"VERSION\": \"${RELEASE_VERSION/-g/-}\"}" > src/version.json && \
+    pnpm run build
+
+# ================================
+# API Builder Stage
+# ================================
+FROM --platform=$BUILDPLATFORM ghcr.io/techknowlogick/xgo:go-1.23.x@sha256:37bfe9dccce00f473c55369be10018e5c8f653409d5c5e5467b1a3be06318652 AS apibuilder
+
+# 优化：使用缓存挂载安装 mage
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    go install github.com/magefile/mage@latest && \
+    mv /go/bin/mage /usr/local/go/bin
+
+WORKDIR /go/src/code.vikunja.io/api
+
+# 优化：先复制 go.mod 和 go.sum，利用层缓存
+COPY go.mod go.sum ./
+RUN --mount=type=cache,target=/go/pkg/mod \
+    go mod download
+
+# 复制源代码
+COPY . ./
+
+# 复制前端构建结果
+COPY --from=frontendbuilder /build/dist ./frontend/dist
+
+# 设置构建参数和环境变量
+ARG TARGETOS TARGETARCH TARGETVARIANT RELEASE_VERSION
+ENV RELEASE_VERSION=$RELEASE_VERSION
+ENV CGO_ENABLED=1
+ENV GOOS=$TARGETOS
+ENV GOARCH=$TARGETARCH
+
+# 优化：使用缓存挂载进行构建
+RUN --mount=type=cache,target=/go/pkg/mod \
+    --mount=type=cache,target=/root/.cache/go-build \
+    export PATH=$PATH:$GOPATH/bin && \
+    mage build:clean && \
+    mage release:xgo "${TARGETOS}/${TARGETARCH}/${TARGETVARIANT}"
+
+# ================================
+# Runtime Stage
+# ================================
+FROM alpine:3.20@sha256:beefdbd8a1da6d2915566fde36db9db0b524eb737fc57cd1367effd16dc0d06d AS runtime
+
+# 安装运行时依赖（优化：使用 --no-cache 减少镜像大小）
+RUN apk add --no-cache \
+    ca-certificates \
+    tzdata \
+    && update-ca-certificates
+
+# 创建非 root 用户
+RUN addgroup -g 1000 vikunja && \
+    adduser -D -s /bin/sh -u 1000 -G vikunja vikunja
+
+# 设置工作目录和权限
+WORKDIR /app/vikunja
+RUN chown -R vikunja:vikunja /app/vikunja
+
+# 复制二进制文件
+COPY --from=apibuilder --chown=vikunja:vikunja /build/vikunja-* vikunja
+
+# 确保二进制文件可执行
+RUN chmod +x vikunja
+
+# 设置环境变量
+ENV VIKUNJA_SERVICE_ROOTPATH=/app/vikunja/
+ENV VIKUNJA_DATABASE_PATH=/db/vikunja.db
+
+# 切换到非 root 用户
+USER vikunja
+
+# 暴露端口
+EXPOSE 3456
+
+# 健康检查
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD ./vikunja health || exit 1
+
+# 入口点
+ENTRYPOINT ["./vikunja"]

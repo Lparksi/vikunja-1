@@ -1,0 +1,37 @@
+services:
+  vikunja:
+    build: 
+      context: .
+      dockerfile: Dockerfile.dev
+    environment:
+      VIKUNJA_SERVICE_PUBLICURL: http://localhost:3456  # 请替换为你的实际公共URL
+      VIKUNJA_DATABASE_HOST: db
+      VIKUNJA_DATABASE_PASSWORD: changeme
+      VIKUNJA_DATABASE_TYPE: postgres
+      VIKUNJA_DATABASE_USER: vikunja
+      VIKUNJA_DATABASE_DATABASE: vikunja
+      VIKUNJA_SERVICE_JWTSECRET: your-super-secure-random-secret-here  # 请生成一个安全的随机密钥
+    ports:
+      - "3456:3456"
+    volumes:
+      - ./files:/app/vikunja/files
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: postgis/postgis:17-3.5-alpine
+    environment:
+      POSTGRES_PASSWORD: changeme
+      POSTGRES_USER: vikunja
+      POSTGRES_DB: vikunja  # 添加数据库名称
+    volumes:
+      - ./db:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h localhost -U $$POSTGRES_USER"]
+      interval: 2s
+      timeout: 5s       # 添加超时设置
+      retries: 5        # 添加重试次数
+      start_period: 30s

@@ -646,6 +646,42 @@ func registerAPIRoutes(a *echo.Group) {
 	}
 	a.POST("/projects/:project/views/:view/buckets/:bucket/tasks", taskBucketProvider.UpdateWeb)
 
+	// Merchant Management Routes
+	merchantHandler := &handler.WebHandler{
+		EmptyStruct: func() handler.CObject {
+			return &models.Merchant{}
+		},
+	}
+	a.GET("/merchants", merchantHandler.ReadAllWeb)
+	a.GET("/merchants/:merchant", merchantHandler.ReadOneWeb)
+	a.PUT("/merchants", merchantHandler.CreateWeb)
+	a.POST("/merchants/:merchant", merchantHandler.UpdateWeb)
+	a.DELETE("/merchants/:merchant", merchantHandler.DeleteWeb)
+
+	// Merchant Tags Routes
+	merchantTagHandler := &handler.WebHandler{
+		EmptyStruct: func() handler.CObject {
+			return &models.MerchantTag{}
+		},
+	}
+	a.GET("/merchant-tags", merchantTagHandler.ReadAllWeb)
+	a.GET("/merchant-tags/:merchanttag", merchantTagHandler.ReadOneWeb)
+	a.PUT("/merchant-tags", merchantTagHandler.CreateWeb)
+	a.POST("/merchant-tags/:merchanttag", merchantTagHandler.UpdateWeb)
+	a.DELETE("/merchant-tags/:merchanttag", merchantTagHandler.DeleteWeb)
+
+	// Geo Points Routes
+	geoPointHandler := &handler.WebHandler{
+		EmptyStruct: func() handler.CObject {
+			return &models.GeoPoint{}
+		},
+	}
+	a.GET("/merchants/:merchant/geopoints", geoPointHandler.ReadAllWeb)
+	a.GET("/geopoints/:geopoint", geoPointHandler.ReadOneWeb)
+	a.PUT("/merchants/:merchant/geopoints", geoPointHandler.CreateWeb)
+	a.POST("/geopoints/:geopoint", geoPointHandler.UpdateWeb)
+	a.DELETE("/geopoints/:geopoint", geoPointHandler.DeleteWeb)
+
 	// Plugin routes
 	if config.PluginsEnabled.GetBool() {
 		// Authenticated plugin routes

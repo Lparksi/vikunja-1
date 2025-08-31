@@ -65,6 +65,11 @@ func GetTables() []interface{} {
 		&ProjectView{},
 		&TaskPosition{},
 		&TaskBucket{},
+		// Merchant system tables
+		&Merchant{},
+		&MerchantTag{},
+		&MerchantTagRelation{},
+		&GeoPoint{},
 	}
 }
 

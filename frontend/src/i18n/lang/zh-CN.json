@@ -1152,5 +1152,83 @@
 			"months": "月|月",
 			"years": "年|年"
 		}
+	},
+	"merchant": {
+		"title": "商户管理",
+		"empty": "暂无商户数据",
+		"search": {
+			"placeholder": "搜索商户名称、地址..."
+		},
+		"view": {
+			"list": "列表视图",
+			"map": "地图视图"
+		},
+		"create": {
+			"title": "新建商户",
+			"success": "商户创建成功",
+			"titleRequired": "请输入商户名称"
+		},
+		"edit": {
+			"title": "编辑商户",
+			"success": "商户更新成功"
+		},
+		"delete": {
+			"confirm": "确定要删除商户 \"{merchant}\" 吗？",
+			"success": "商户删除成功",
+			"error": "删除商户失败"
+		},
+		"load": {
+			"error": "加载商户列表失败"
+		},
+		"fields": {
+			"legalName": "法人姓名",
+			"phone": "联系电话",
+			"address": "详细地址",
+			"city": "城市",
+			"area": "区域",
+			"tags": "商户标签",
+			"location": "地理位置"
+		},
+		"geocoding": {
+			"title": "地理编码",
+			"pending": "等待解析",
+			"success": "解析成功",
+			"failed": "解析失败",
+			"retry": "重新解析",
+			"level": "准确度级别",
+			"score": "准确度分数",
+			"attempts": "尝试次数"
+		},
+		"import": {
+			"title": "批量导入",
+			"uploadFile": "上传Excel文件",
+			"processing": "正在处理...",
+			"success": "导入完成",
+			"error": "导入失败",
+			"selectFile": "请选择要导入的Excel文件",
+			"supportedFormats": "支持的格式：.xlsx, .xls"
+		}
+	},
+	"merchantTag": {
+		"title": "商户标签",
+		"create": {
+			"title": "新建标签",
+			"success": "标签创建成功"
+		},
+		"edit": {
+			"title": "编辑标签",
+			"success": "标签更新成功"
+		},
+		"delete": {
+			"confirm": "确定要删除标签 \"{tag}\" 吗？",
+			"success": "标签删除成功"
+		},
+		"fields": {
+			"tagName": "标签名称",
+			"alias": "标签别名",
+			"class": "标签分类",
+			"color": "标签颜色",
+			"remarks": "备注说明"
+		}
 	}
 }
