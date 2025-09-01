@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  vikunja-python:
+    build: .
+    ports:
+      - "3456:3456"
+    environment:
+      - VIKUNJA_DATABASE_TYPE=postgresql
+      - VIKUNJA_DATABASE_HOST=db
+      - VIKUNJA_DATABASE_PORT=5432
+      - VIKUNJA_DATABASE_USER=vikunja
+      - VIKUNJA_DATABASE_PASSWORD=vikunja
+      - VIKUNJA_DATABASE_DATABASE=vikunja
+      - VIKUNJA_SERVICE_JWTSECRET=your-super-secret-jwt-key
+      - VIKUNJA_CORS_ENABLE=true
+      - VIKUNJA_CORS_ORIGINS=["http://localhost:3000"]
+    depends_on:
+      - db
+    volumes:
+      - ./files:/app/files
+    restart: unless-stopped
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=vikunja
+      - POSTGRES_USER=vikunja
+      - POSTGRES_PASSWORD=vikunja
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Optional: Frontend container
+  frontend:
+    image: vikunja/frontend:latest
+    ports:
+      - "3000:80"
+    environment:
+      - VIKUNJA_API_URL=http://vikunja-python:3456/api/v1
+    depends_on:
+      - vikunja-python
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
